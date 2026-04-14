@@ -4,20 +4,35 @@
     <meta charset="UTF-8">
     <title>Budget Tracker</title>
 </head>
+
 <body>
 
-    <h1>Budget Tracker</h1>
+<h1>Budget Tracker</h1>
 
-    <input type="text" id="desc" placeholder="Enter description">
-    <input type="number" id="amount" placeholder="Enter amount">
-    <button id="addBtn">Add</button>
+<!-- Type Buttons -->
+<button onclick="setType('income')">Income</button>
+<button onclick="setType('expense')">Expense</button>
 
-    <h3 id="total">Total: 0</h3>
+<br><br>
 
-    <ul id="list"></ul>
+<!-- Form -->
+<input type="number" id="amount" placeholder="Enter amount">
 
-    <!-- IMPORTANT: Connect JS -->
-    <script src="js/transactions.js"></script>
+<select id="category"></select>
+
+<input type="text" id="desc" placeholder="Enter description">
+
+<input type="date" id="date">
+
+<button onclick="addTransaction()">Add Transaction</button>
+
+<p id="msg"></p>
+
+<h3 id="total">Total: ₹0</h3>
+
+<ul id="list"></ul>
+
+<script src="js/transactions.js"></script>
 
 </body>
 </html>

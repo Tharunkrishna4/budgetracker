@@ -1,60 +1,52 @@
 let transactions = [];
+let currentType = "income";
 
-// ===== LOCAL STORAGE =====
-function saveTransactions() {
-    localStorage.setItem("transactions", JSON.stringify(transactions));
+// ===== SET TYPE =====
+function setType(type) {
+    currentType = type;
+    updateCategories();
 }
 
-function loadTransactions() {
-    const data = localStorage.getItem("transactions");
-    if (data) {
-        transactions = JSON.parse(data);
-        renderTransactions();
+// ===== UPDATE CATEGORY =====
+function updateCategories() {
+    const category = document.getElementById("category");
+    category.innerHTML = "";
+
+    let options = [];
+
+    if (currentType === "income") {
+        options = ["Salary", "Freelance", "Other"];
+    } else {
+        options = ["Rent", "Shopping", "Transport", "Entertainment", "Other"];
     }
-}
 
-// ===== CALCULATE TOTAL =====
-function getTotal() {
-    return transactions.reduce((sum, t) => sum + t.amount, 0);
-}
-
-// ===== RENDER LIST =====
-function renderTransactions() {
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-
-    transactions.forEach(t => {
-        const li = document.createElement("li");
-
-        // ✅ FIXED ₹ SYMBOL HERE
-        li.innerText = `${t.desc} - ₹${t.amount}`;
-
-        list.appendChild(li);
+    options.forEach(opt => {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.innerText = opt;
+        category.appendChild(option);
     });
-
-    document.getElementById("total").innerText =
-        "Total: ₹" + getTotal();
 }
 
-// ===== UI CONNECTION =====
-const descInput = document.getElementById("desc");
-const amountInput = document.getElementById("amount");
-const addBtn = document.getElementById("addBtn");
+// ===== ADD TRANSACTION =====
+function addTransaction() {
+    const amount = Number(document.getElementById("amount").value);
+    const category = document.getElementById("category").value;
+    const desc = document.getElementById("desc").value;
+    const date = document.getElementById("date").value;
 
-// ===== BUTTON CLICK =====
-addBtn.addEventListener("click", () => {
-    const desc = descInput.value;
-    const amount = Number(amountInput.value);
-
-    if (desc === "" || amount === 0) {
-        alert("Enter valid data");
+    if (!amount || !desc || !date) {
+        alert("Fill all fields");
         return;
     }
 
     const transaction = {
         id: Date.now(),
-        desc: desc,
-        amount: amount
+        type: currentType,
+        amount: amount,
+        category: category,
+        description: desc,
+        date: date
     };
 
     transactions.push(transaction);
@@ -62,10 +54,59 @@ addBtn.addEventListener("click", () => {
     saveTransactions();
     renderTransactions();
 
-    descInput.value = "";
-    amountInput.value = "";
-});
+    document.getElementById("msg").innerText = "Transaction Added!";
 
-// ===== LOAD ON START =====
-loadTransactions();
-renderTransactions();
+    // Clear fields
+    document.getElementById("amount").value = "";
+    document.getElementById("desc").value = "";
+    document.getElementById("date").value = "";
+}
+
+// ===== SAVE TO LOCALSTORAGE =====
+function saveTransactions() {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+
+// ===== LOAD FROM LOCALSTORAGE =====
+function loadTransactions() {
+    const data = localStorage.getItem("transactions");
+    if (data) {
+        transactions = JSON.parse(data);
+    }
+}
+
+// ===== RENDER =====
+function renderTransactions() {
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    let total = 0;
+
+    transactions.forEach(t => {
+        const li = document.createElement("li");
+
+        li.innerText =
+            t.type + " | " +
+            t.category + " | " +
+            t.description + " | ₹" +
+            t.amount + " | " +
+            t.date;
+
+        list.appendChild(li);
+
+        if (t.type === "income") {
+            total += t.amount;
+        } else {
+            total -= t.amount;
+        }
+    });
+
+    document.getElementById("total").innerText = "Total: ₹" + total;
+}
+
+// ===== RUN ON LOAD =====
+window.onload = function () {
+    loadTransactions();
+    updateCategories();
+    renderTransactions();
+};
