@@ -4,7 +4,7 @@ let editId = null;
 
 // CATEGORY DATA
 const incomeCategories = ["Salary", "Freelance", "Other"];
-const expenseCategories = ["Rent", "Shopping", "Food", "Travel"];
+const expenseCategories = ["Rent", "Shopping", "Food", "Travel","Other"];
 
 // SET TYPE
 function setType(type) {
