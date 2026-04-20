@@ -3,15 +3,15 @@ let currentType = "income";
 
 // CATEGORY DATA
 const incomeCategories = ["Salary", "Freelance", "Other"];
-const expenseCategories = ["Rent", "Shopping", "Transport", "Entertainment", "Other"];
+const expenseCategories = ["Rent", "Food", "Shopping", "Transport"];
 
-// SET TYPE (Income / Expense)
+// SET TYPE
 function setType(type) {
     currentType = type;
     updateCategories();
 }
 
-// UPDATE DROPDOWN
+// UPDATE CATEGORY
 function updateCategories() {
     const category = document.getElementById("category");
     category.innerHTML = "";
@@ -26,6 +26,7 @@ function updateCategories() {
     });
 }
 
+// ADD TRANSACTION
 function addTransaction() {
     const amount = Number(document.getElementById("amount").value);
     const category = document.getElementById("category").value;
@@ -50,6 +51,7 @@ function addTransaction() {
 
     saveTransactions();
     renderTransactions();
+    calculateBalance();
 
     // CLEAR INPUTS
     document.getElementById("amount").value = "";
@@ -59,11 +61,12 @@ function addTransaction() {
     document.getElementById("confirmMsg").innerText = "Transaction Added!";
 }
 
-// SAVE TO LOCAL STORAGE
+// SAVE
 function saveTransactions() {
     localStorage.setItem("transactions", JSON.stringify(transactions));
 }
 
+// LOAD
 function loadTransactions() {
     const data = localStorage.getItem("transactions");
     if (data) {
@@ -71,15 +74,12 @@ function loadTransactions() {
     }
 }
 
-// RENDER TRANSACTIONS (DAY 3)
+// RENDER CARDS
 function renderTransactions() {
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    let total = 0;
-
     transactions.forEach(t => {
-
         const card = document.createElement("div");
         card.classList.add("card");
         card.classList.add(t.type);
@@ -92,15 +92,27 @@ function renderTransactions() {
         `;
 
         list.appendChild(card);
+    });
+}
 
+// CALCULATE BALANCE
+function calculateBalance() {
+    let income = 0;
+    let expense = 0;
+
+    transactions.forEach(t => {
         if (t.type === "income") {
-            total += t.amount;
+            income += t.amount;
         } else {
-            total -= t.amount;
+            expense += t.amount;
         }
     });
 
-    document.getElementById("total").innerText = "Total: ₹" + total;
+    let balance = income - expense;
+
+    document.getElementById("income").innerText = "Income: ₹" + income;
+    document.getElementById("expense").innerText = "Expense: ₹" + expense;
+    document.getElementById("balance").innerText = "Balance: ₹" + balance;
 }
 
 // RUN ON LOAD
@@ -108,4 +120,5 @@ window.onload = function () {
     loadTransactions();
     updateCategories();
     renderTransactions();
+    calculateBalance();
 };

@@ -1,71 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
     <title>Budget Tracker</title>
-
-    <style>
-        body {
-            font-family: Arial;
-            padding: 20px;
-        }
-
-        button {
-            margin: 5px;
-        }
-
-        input, select {
-            margin: 5px;
-            padding: 5px;
-        }
-
-        .card {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .income {
-            background-color: green;
-        }
-
-        .expense {
-            background-color: red;
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
 <h1>Budget Tracker</h1>
 
-<!-- TYPE BUTTONS -->
+<!-- TYPE TOGGLE -->
 <button onclick="setType('income')">Income</button>
 <button onclick="setType('expense')">Expense</button>
 
-<br>
+<br><br>
 
 <!-- FORM -->
 <input type="number" id="amount" placeholder="Enter amount">
-
 <select id="category"></select>
-
 <input type="text" id="description" placeholder="Enter description">
-
 <input type="date" id="date">
 
 <button onclick="addTransaction()">Add Transaction</button>
 
 <p id="confirmMsg"></p>
 
-<h3 id="total">Total: ₹0</h3>
+<!-- BALANCE -->
+<h3 id="balance">Balance: ₹0</h3>
+<p id="income">Income: ₹0</p>
+<p id="expense">Expense: ₹0</p>
 
-<!-- LIST -->
+<hr>
+
+<!-- TRANSACTION LIST -->
 <div id="list"></div>
 
 <script src="js/transactions.js"></script>
-
 </body>
 </html>

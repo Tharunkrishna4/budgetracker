@@ -1,0 +1,35 @@
+body {
+    font-family: Arial;
+    padding: 20px;
+}
+
+/* BUTTONS */
+button {
+    padding: 6px 12px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+/* CARD DESIGN */
+.card {
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* COLORS */
+.income {
+    background: green;
+}
+
+.expense {
+    background: red;
+}
+
+/* TEXT */
+.card div {
+    margin-right: 10px;
+}
