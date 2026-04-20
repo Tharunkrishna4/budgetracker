@@ -1,9 +1,10 @@
 let transactions = [];
 let currentType = "income";
+let editId = null;
 
 // CATEGORY DATA
 const incomeCategories = ["Salary", "Freelance", "Other"];
-const expenseCategories = ["Rent", "Food", "Shopping", "Transport"];
+const expenseCategories = ["Rent", "Shopping", "Food", "Travel"];
 
 // SET TYPE
 function setType(type) {
@@ -11,7 +12,7 @@ function setType(type) {
     updateCategories();
 }
 
-// UPDATE CATEGORY
+// UPDATE CATEGORY DROPDOWN
 function updateCategories() {
     const category = document.getElementById("category");
     category.innerHTML = "";
@@ -26,7 +27,7 @@ function updateCategories() {
     });
 }
 
-// ADD TRANSACTION
+// ADD / EDIT TRANSACTION
 function addTransaction() {
     const amount = Number(document.getElementById("amount").value);
     const category = document.getElementById("category").value;
@@ -38,16 +39,38 @@ function addTransaction() {
         return;
     }
 
-    const transaction = {
-        id: Date.now(),
-        type: currentType,
-        amount: amount,
-        category: category,
-        description: description,
-        date: date
-    };
+    if (editId) {
+        // UPDATE
+        transactions = transactions.map(t => {
+            if (t.id === editId) {
+                return {
+                    ...t,
+                    amount,
+                    category,
+                    description,
+                    date,
+                    type: currentType
+                };
+            }
+            return t;
+        });
 
-    transactions.push(transaction);
+        editId = null;
+        document.getElementById("confirmMsg").innerText = "Transaction Updated!";
+    } else {
+        // ADD
+        const transaction = {
+            id: Date.now(),
+            type: currentType,
+            amount,
+            category,
+            description,
+            date
+        };
+
+        transactions.push(transaction);
+        document.getElementById("confirmMsg").innerText = "Transaction Added!";
+    }
 
     saveTransactions();
     renderTransactions();
@@ -57,45 +80,59 @@ function addTransaction() {
     document.getElementById("amount").value = "";
     document.getElementById("description").value = "";
     document.getElementById("date").value = "";
-
-    document.getElementById("confirmMsg").innerText = "Transaction Added!";
 }
 
-// SAVE
-function saveTransactions() {
-    localStorage.setItem("transactions", JSON.stringify(transactions));
+// DELETE
+function deleteTransaction(id) {
+    transactions = transactions.filter(t => t.id !== id);
+
+    saveTransactions();
+    renderTransactions();
+    calculateBalance();
 }
 
-// LOAD
-function loadTransactions() {
-    const data = localStorage.getItem("transactions");
-    if (data) {
-        transactions = JSON.parse(data);
-    }
+// EDIT
+function editTransaction(id) {
+    const t = transactions.find(t => t.id === id);
+
+    document.getElementById("amount").value = t.amount;
+    document.getElementById("description").value = t.description;
+    document.getElementById("date").value = t.date;
+
+    currentType = t.type;
+    updateCategories();
+    document.getElementById("category").value = t.category;
+
+    editId = id;
 }
 
-// RENDER CARDS
+// RENDER
 function renderTransactions() {
     const list = document.getElementById("list");
     list.innerHTML = "";
 
     transactions.forEach(t => {
         const card = document.createElement("div");
-        card.classList.add("card");
-        card.classList.add(t.type);
+
+        card.style.background = t.type === "income" ? "green" : "red";
+        card.style.color = "white";
+        card.style.margin = "10px";
+        card.style.padding = "10px";
 
         card.innerHTML = `
             <div>₹${t.amount}</div>
             <div>${t.category}</div>
             <div>${t.description}</div>
             <div>${t.date}</div>
+            <button onclick="editTransaction(${t.id})">Edit</button>
+            <button onclick="deleteTransaction(${t.id})">Delete</button>
         `;
 
         list.appendChild(card);
     });
 }
 
-// CALCULATE BALANCE
+// BALANCE
 function calculateBalance() {
     let income = 0;
     let expense = 0;
@@ -115,7 +152,19 @@ function calculateBalance() {
     document.getElementById("balance").innerText = "Balance: ₹" + balance;
 }
 
-// RUN ON LOAD
+// STORAGE
+function saveTransactions() {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+
+function loadTransactions() {
+    const data = localStorage.getItem("transactions");
+    if (data) {
+        transactions = JSON.parse(data);
+    }
+}
+
+// ON LOAD
 window.onload = function () {
     loadTransactions();
     updateCategories();

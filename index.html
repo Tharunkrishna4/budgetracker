@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>Budget Tracker</title>
     <link rel="stylesheet" href="css/style.css">
@@ -8,30 +8,27 @@
 
 <h1>Budget Tracker</h1>
 
-<!-- TYPE TOGGLE -->
+<!-- TYPE BUTTONS -->
 <button onclick="setType('income')">Income</button>
 <button onclick="setType('expense')">Expense</button>
 
 <br><br>
 
-<!-- FORM -->
+<!-- INPUTS -->
 <input type="number" id="amount" placeholder="Enter amount">
 <select id="category"></select>
 <input type="text" id="description" placeholder="Enter description">
 <input type="date" id="date">
-
 <button onclick="addTransaction()">Add Transaction</button>
 
 <p id="confirmMsg"></p>
 
-<!-- BALANCE -->
 <h3 id="balance">Balance: ₹0</h3>
 <p id="income">Income: ₹0</p>
 <p id="expense">Expense: ₹0</p>
 
 <hr>
 
-<!-- TRANSACTION LIST -->
 <div id="list"></div>
 
 <script src="js/transactions.js"></script>
