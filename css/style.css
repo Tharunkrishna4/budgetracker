@@ -17,12 +17,12 @@ h1 {
   cursor: pointer;
 }
 
-.income-btn {
+.incomeBtn {
   background: #2ecc71;
   color: white;
 }
 
-.expense-btn {
+.expenseBtn {
   background: #e74c3c;
   color: white;
 }
@@ -75,23 +75,45 @@ h1 {
   background: #e74c3c;
 }
 
-/* Transactions */
+/* Transaction list spacing */
 .transactions {
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
+/* Transaction card (no flex here) */
 .transaction-card {
   background: white;
   padding: 12px;
   margin: 10px 0;
   border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Row layout (THIS handles alignment) */
+.transaction-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.transaction-card div {
-  line-height: 1.4;
+/* Left content */
+.left {
+  text-align: left;
+}
+
+/* Right side (amount) */
+.right {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Text spacing */
+.transaction-card p {
+  margin: 4px 0;
+}
+
+.transaction-card small {
+  color: gray;
 }
 
 .delete-btn {

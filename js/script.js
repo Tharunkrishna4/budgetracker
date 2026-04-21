@@ -7,22 +7,40 @@ const expenseCategories = ["Food","Rent","Transport","Shopping","Other"];
 
 /* Set type */
 function setType(t) {
-  type = t;
-  loadCategories();
+    type = t;
+
+    const incomeBtn = document.getElementById("incomeBtn");
+    const expenseBtn = document.getElementById("expenseBtn");
+
+    if (t === "income") {
+        incomeBtn.classList.add("active");
+        expenseBtn.classList.remove("active");
+    } else {
+        expenseBtn.classList.add("active");
+        incomeBtn.classList.remove("active");
+    }
+
+    loadCategories();
 }
 
 function loadCategories() {
-  const category = document.getElementById("category");
-  category.innerHTML = "";
+    const category = document.getElementById("category");
+    category.innerHTML = "";
 
-  let selected = type === "income" ? incomeCategories : expenseCategories;
+    let selected;
 
-  selected.forEach(cat => {
-    let option = document.createElement("option");
-    option.value = cat;
-    option.textContent = cat;
-    category.appendChild(option);
-  });
+    if (type === "income") {
+        selected = incomeCategories;
+    } else {
+        selected = expenseCategories;
+    }
+
+    selected.forEach(function(cat) {
+        let option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        category.appendChild(option);
+    });
 }
 
 /* Add transaction */
@@ -71,13 +89,21 @@ function updateUI() {
     const div = document.createElement("div");
     div.className = "transaction-card";
 
-    div.innerHTML = `
-      <div>
-        <b>${t.type.toUpperCase()}</b> - ₹${t.amount}<br>
-        ${t.category} - ${t.desc}
-      </div>
-      <button class="delete-btn" onclick="deleteTx(${t.id})">Delete</button>
-    `;
+  div.innerHTML = `
+  <div class="transaction-row">
+    <div class="left">
+      <b>${t.type.toUpperCase()}</b>
+      <p>${t.category} - ${t.desc}</p>
+      <small>${t.date}</small>
+    </div>
+    <div class="right">
+      ₹${t.amount}
+    </div>
+    <button class="delete-btn"
+  onclick="deleteTransaction(${t.id})">✖</button>
+     
+  </div>
+`;
 
     list.appendChild(div);
   });
@@ -88,7 +114,7 @@ function updateUI() {
 }
 
 /* Delete */
-function deleteTx(id) {
+function deleteTransaction(id) {
   transactions = transactions.filter(t => t.id !== id);
   updateUI();
   updateChart();
