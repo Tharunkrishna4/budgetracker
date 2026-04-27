@@ -6,36 +6,30 @@ let chart;
 const incomeCategories = ["Salary","Freelance","Business","Other"];
 const expenseCategories = ["Food","Rent","Shopping","Transport","Entertainment","Other"];
 
-/* TYPE */
+/* ================= TYPE ================= */
 function setType(t){
-    // set current type
     type = t;
 
-    // reload categories
     loadCategories();
 
-    // get buttons
     const incomeBtn = document.getElementById("incomeBtn");
     const expenseBtn = document.getElementById("expenseBtn");
     const addBtn = document.getElementById("addBtn");
 
-    // toggle active class (top buttons)
     if(type === "income"){
         incomeBtn.classList.add("active");
         expenseBtn.classList.remove("active");
 
-        // change add button color
-        addBtn.style.background = "#4caf50"; // green
+        addBtn.style.background = "#2e7d32"; // green
     } else {
         expenseBtn.classList.add("active");
         incomeBtn.classList.remove("active");
 
-        // change add button color
-        addBtn.style.background = "#f44336"; // red
+        addBtn.style.background = "#c62828"; // red
     }
 }
 
-/* CATEGORY */
+/* ================= CATEGORY ================= */
 function loadCategories(){
   const select = document.getElementById("category");
   select.innerHTML = "";
@@ -50,7 +44,18 @@ function loadCategories(){
   });
 }
 
-/* ADD */
+/* ================= CLEAR FORM (FIXED) ================= */
+function clearForm(){
+  document.getElementById("amount").value = "";
+  document.getElementById("desc").value = "";
+  document.getElementById("date").value = "";
+  document.getElementById("category").selectedIndex = 0;
+
+  // smooth UX
+  document.getElementById("amount").focus();
+}
+
+/* ================= ADD ================= */
 document.getElementById("addBtn").addEventListener("click", ()=>{
 
   const amount = Number(document.getElementById("amount").value);
@@ -84,13 +89,12 @@ document.getElementById("addBtn").addEventListener("click", ()=>{
   updateUI();
   updateChart();
   renderMonthlySummary();
+  updateGoalUI();
 
-  document.getElementById("amount").value = "";
-  document.getElementById("desc").value = "";
-  document.getElementById("date").value = "";
+  clearForm(); // ✅ FIX APPLIED HERE
 });
 
-/* DELETE */
+/* ================= DELETE ================= */
 function deleteTransaction(id){
   transactions = transactions.filter(t => t.id !== id);
 
@@ -99,9 +103,10 @@ function deleteTransaction(id){
   updateUI();
   updateChart();
   renderMonthlySummary();
+  updateGoalUI();
 }
 
-/* EDIT */
+/* ================= EDIT ================= */
 function editTransaction(id){
   const t = transactions.find(x => x.id === id);
 
@@ -113,11 +118,13 @@ function editTransaction(id){
   loadCategories();
   document.getElementById("category").value = t.category;
 
+  setType(type);
+
   editingId = id;
   document.getElementById("addBtn").innerText = "Update";
 }
 
-/* FILTER LOAD */
+/* ================= FILTER LOAD ================= */
 function loadFilters(){
 
   const monthSelect = document.getElementById("filterMonth");
@@ -145,7 +152,7 @@ function loadFilters(){
   catSelect.value = selectedCat || "all";
 }
 
-/* UI */
+/* ================= UI ================= */
 function updateUI(){
 
   loadFilters();
@@ -180,20 +187,20 @@ function updateUI(){
     const div = document.createElement("div");
     div.className = "transaction " + t.type;
 
-div.innerHTML = `
-  <div class="details">
-    <div class="title">${t.category} - ${t.desc}</div>
-    <div class="date">${t.date}</div>
-    <div class="amount">
-      ${t.type === "income" ? "Income" : "Expense"}: ₹${t.amount}
-    </div>
-  </div>
+    div.innerHTML = `
+      <div class="details">
+        <div class="title">${t.category} - ${t.desc}</div>
+        <div class="date">${t.date}</div>
+        <div class="amount">
+          ${t.type === "income" ? "Income" : "Expense"}: ₹${t.amount}
+        </div>
+      </div>
 
-  <div class="right">
-    <button class="edit-btn" onclick="editTransaction(${t.id})">Edit</button>
-    <button class="delete-btn" onclick="deleteTransaction(${t.id})">Delete</button>
-  </div>
-`;
+      <div class="right">
+        <button class="edit-btn" onclick="editTransaction(${t.id})">Edit</button>
+        <button class="delete-btn" onclick="deleteTransaction(${t.id})">Delete</button>
+      </div>
+    `;
 
     list.appendChild(div);
   });
@@ -203,7 +210,7 @@ div.innerHTML = `
   document.getElementById("balance").innerText = "Balance: ₹" + (income - expense);
 }
 
-/* CHART */
+/* ================= CHART ================= */
 function updateChart(){
 
   const data = {};
@@ -235,7 +242,7 @@ function updateChart(){
   });
 }
 
-/* MONTHLY */
+/* ================= MONTHLY ================= */
 function renderMonthlySummary(){
 
   const container = document.getElementById("monthlyList");
@@ -270,16 +277,151 @@ function renderMonthlySummary(){
   }
 }
 
-/* FILTER EVENTS */
+function getBalance(){
+  let income = 0, expense = 0;
+
+  transactions.forEach(t=>{
+    if(t.type === "income") income += t.amount;
+    else expense += t.amount;
+  });
+
+  return income - expense;
+}
+
+function formatMoney(num){
+  return num.toLocaleString("en-IN");
+}
+
+// =======================
+// GOAL FUNCTIONS
+// =======================
+
+// SAVE GOAL
+function saveGoal(){
+
+  const name = document.getElementById("goalName").value.trim();
+  const amount = Number(document.getElementById("goalAmount").value);
+
+  if(!name || !amount || amount <= 0){
+    alert("Enter valid goal details");
+    return;
+  }
+
+  const goal = {
+    name,
+    amount,
+    saved: 0
+  };
+
+  localStorage.setItem("goal", JSON.stringify(goal));
+
+  document.getElementById("goalName").value = "";
+  document.getElementById("goalAmount").value = "";
+
+  updateGoalUI();
+}
+
+
+// ADD TO GOAL (NO TRANSACTIONS)
+function addToGoal(){
+
+  const goal = JSON.parse(localStorage.getItem("goal"));
+  if(!goal) return;
+
+  const addAmount = Number(document.getElementById("goalAddAmount").value);
+  if(!addAmount || addAmount <= 0) return;
+
+  const balance = getBalance();
+
+  // ❌ Not enough balance
+  if(addAmount > balance){
+    alert("❌ Not enough balance!");
+    return;
+  }
+
+  // ✅ Add to goal only
+  goal.saved += addAmount;
+
+  localStorage.setItem("goal", JSON.stringify(goal));
+
+  document.getElementById("goalAddAmount").value = "";
+
+  updateGoalUI();
+}
+
+
+// DELETE GOAL
+function deleteGoal(){
+  localStorage.removeItem("goal");
+  updateGoalUI();
+}
+
+
+// UPDATE UI
+function updateGoalUI(){
+
+  const goal = JSON.parse(localStorage.getItem("goal"));
+
+  const display = document.getElementById("goalDisplay");
+  const status = document.getElementById("goalStatus");
+  const progress = document.getElementById("progressFill");
+  const addSection = document.querySelector(".goal-add");
+
+  if(!goal){
+    display.innerHTML = "No goal set";
+    status.innerHTML = "";
+    progress.style.width = "0%";
+    addSection.style.display = "none";
+    return;
+  }
+
+  const balance = getBalance();
+
+  const percent = Math.min((goal.saved / goal.amount) * 100, 100);
+
+  display.innerHTML = `<b>${goal.name}</b> - ₹${goal.amount}`;
+  progress.style.width = percent + "%";
+
+  // ❌ Not enough total balance
+  if(balance < goal.amount){
+    status.innerHTML =
+      `💰 Balance: ₹${balance} <br>
+       🎯 Goal: ₹${goal.amount} <br>
+       ❌ Cannot achieve goal (low balance)`;
+    
+    addSection.style.display = "none";
+    return;
+  }
+
+  // ✅ Goal achieved
+  if(goal.saved >= goal.amount){
+    status.innerHTML =
+      `🎉 Goal Achieved! <br>
+       💰 Saved: ₹${goal.saved}`;
+    
+    addSection.style.display = "none";
+  }
+  else{
+    status.innerHTML =
+      `💰 Saved: ₹${goal.saved} <br>
+       🎯 Goal: ₹${goal.amount} <br>
+       💸 Remaining: ₹${goal.amount - goal.saved}`;
+    
+    addSection.style.display = "flex";
+  }
+}
+
+/* ================= FILTER EVENTS ================= */
 document.getElementById("filterMonth").addEventListener("change", updateUI);
 document.getElementById("filterType").addEventListener("change", updateUI);
 document.getElementById("filterCategory").addEventListener("change", updateUI);
 
-/* INIT */
+/* ================= INIT ================= */
 window.onload = ()=>{
   loadCategories();
   setType("income");
   updateUI();
   updateChart();
   renderMonthlySummary();
+  updateGoalUI();
 };

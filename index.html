@@ -13,6 +13,7 @@
 
 <h1 class="title">Budget Tracker</h1>
 
+<!-- TYPE TOGGLE -->
 <div class="type-toggle center">
   <button id="incomeBtn" onclick="setType('income')">Income</button>
   <button id="expenseBtn" onclick="setType('expense')">Expense</button>
@@ -21,17 +22,11 @@
 <!-- FORM -->
 <div class="form-card">
   <div class="form-row">
-
     <input type="number" id="amount" placeholder="💰 Amount">
-
     <select id="category"></select>
-
     <input type="text" id="desc" placeholder="📝 Description">
-
     <input type="date" id="date">
-
     <button id="addBtn">Add</button>
-
   </div>
 </div>
 
@@ -40,6 +35,37 @@
   <div class="balance" id="balance">Balance: ₹0</div>
   <div class="income-box" id="income">Income: ₹0</div>
   <div class="expense-box" id="expense">Expense: ₹0</div>
+</div>
+
+<h2>Savings Goal</h2>
+
+<div class="goal-box">
+
+  <!-- Inputs -->
+  <div class="goal-inputs">
+    <input type="text" id="goalName" placeholder="Goal name">
+    <input type="number" id="goalAmount" placeholder="Goal amount">
+    <button onclick="saveGoal()">Set Goal</button>
+    <button onclick="deleteGoal()">Delete Goal</button>
+  </div>
+
+  <!-- Title -->
+  <h3 id="goalDisplay"></h3>
+
+  <!-- Progress -->
+  <div class="progress-bar">
+    <div id="progressFill"></div>
+  </div>
+
+  <!-- Status -->
+  <p id="goalStatus"></p>
+
+  <!-- Add -->
+  <div class="goal-add">
+    <input type="number" id="goalAddAmount" placeholder="Add amount">
+    <button onclick="addToGoal()">Add to Goal</button>
+  </div>
+
 </div>
 
 <!-- FILTERS -->
@@ -60,10 +86,8 @@
 
 <h2>Expense Chart</h2>
 <div class="chart-container">
- <canvas id="mychart"></canvas>
+  <canvas id="mychart"></canvas>
 </div>
-
-
 
 <h2>Monthly Summary</h2>
 <div id="monthlyList"></div>
