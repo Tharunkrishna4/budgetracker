@@ -114,6 +114,8 @@ document.getElementById("addBtn").addEventListener("click", ()=>{
   updateChart();
   renderMonthlySummary();
   updateGoalUI();
+  document.getElementById("transactionsSection")
+   .scrollIntoView({behavior:"smooth"});
 });
 
 /* ================= DELETE ================= */
@@ -144,6 +146,9 @@ function editTransaction(id){
 
   editingId = id;
   document.getElementById("addBtn").innerText = "Update";
+
+  document.getElementById("formSection")
+   .scrollIntoView({behavior:"smooth"});
 }
 
 /* ================= FILTER LOAD ================= */
@@ -265,6 +270,10 @@ function updateChart(){
         data: values,
         backgroundColor: ["red","blue","green","orange","purple"]
       }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
     }
   });
 }
@@ -367,23 +376,59 @@ function addToGoal(){
   if(!goal) return;
 
   const addAmount = Number(document.getElementById("goalAddAmount").value);
-  if(!addAmount || addAmount <= 0) return;
+  const goalDate = document.getElementById("goalDate").value;
 
-  const balance = getBalance();
-
-  // ❌ Not enough balance
-  if(addAmount > balance){
-    alert("❌ Not enough balance!");
+  if(!addAmount || addAmount <= 0){
+    alert("Enter valid amount");
     return;
   }
 
-  // ✅ Add to goal only
+  if(!goalDate){
+    alert("Select a date");
+    return;
+  }
+
+  const balance = getBalance();
+
+  // ❌ insufficient balance
+  if(addAmount > balance){
+    alert("Not enough balance");
+    return;
+  }
+
+  // ✅ Add to goal
   goal.saved += addAmount;
 
-  localStorage.setItem("goal", JSON.stringify(goal));
+  // ✅ IF GOAL COMPLETED → ADD TO TRANSACTION
+  if(goal.saved >= goal.amount){
 
+    transactions.push({
+      id: Date.now(),
+      type: "expense",
+      amount: goal.amount,
+      desc: "Goal Achieved: " + goal.name,
+      date: goalDate,
+      category: "Goal"
+    });
+
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+
+    alert("🎉 Goal completed & amount deducted!");
+
+    // ❌ Remove goal after completion
+    localStorage.removeItem("goal");
+
+  } else {
+    localStorage.setItem("goal", JSON.stringify(goal));
+  }
+
+  // Clear inputs
   document.getElementById("goalAddAmount").value = "";
+  document.getElementById("goalDate").value = "";
 
+  updateUI();
+  updateChart();
+  renderMonthlySummary();
   updateGoalUI();
 }
 
@@ -423,9 +468,9 @@ function updateGoalUI(){
   // ❌ Not enough total balance
   if(balance < goal.amount){
     status.innerHTML =
-      `💰 Balance: ₹${balance} <br>
-       🎯 Goal: ₹${goal.amount} <br>
-       ❌ Cannot achieve goal (low balance)`;
+  `💰 Saved: ₹${goal.saved} <br>
+   🎯 Goal: ₹${goal.amount} <br>
+   💸 Remaining: ₹${goal.amount - goal.saved}`;
     
     addSection.style.display = "none";
     return;

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Budget Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
 
@@ -10,6 +11,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <div class="app-container">
+
 
 <h1 class="title">Budget Tracker</h1>
 
@@ -20,13 +23,41 @@
 </div>
 
 <!-- FORM -->
-<div class="form-card">
+<!-- FORM -->
+<div id="formSection" class="form-card">
   <div class="form-row">
-    <input type="number" id="amount" placeholder="💰 Amount">
-    <select id="category"></select>
-    <input type="text" id="desc" placeholder="📝 Description">
-    <input type="date" id="date">
+
+    <!-- Amount -->
+    <input 
+      type="number" 
+      id="amount" 
+      placeholder="💰 Amount"
+    >
+
+    <!-- Category -->
+    <select id="category">
+      <option value="Salary">Salary</option>
+      <option value="Food">Food</option>
+      <option value="Transport">Transport</option>
+      <option value="Shopping">Shopping</option>
+    </select>
+
+    <!-- Description -->
+    <input 
+      type="text" 
+      id="desc" 
+      placeholder="📝 Description"
+    >
+
+    <!-- Date -->
+    <input 
+      type="date" 
+      id="date"
+    >
+
+    <!-- Add Button -->
     <button id="addBtn">Add</button>
+
   </div>
 </div>
 
@@ -45,6 +76,7 @@
   <div class="goal-inputs">
     <input type="text" id="goalName" placeholder="Goal name">
     <input type="number" id="goalAmount" placeholder="Goal amount">
+    <input type="date" id="goalDate">
     <button onclick="saveGoal()">Set Goal</button>
     <button onclick="deleteGoal()">Delete Goal</button>
   </div>
@@ -83,8 +115,10 @@
 
 <button id="exportBtn" onclick="exportCSV()">📥 Export CSV</button>
 
-<h2>Transactions</h2>
-<div id="list"></div>
+<div id="transactionsSection">
+  <h2>Transactions</h2>
+  <div id="list"></div>
+</div>
 
 <h2>Expense Chart</h2>
 <div class="chart-container">
@@ -97,6 +131,6 @@
 <script src="js/script.js"></script>
 
 <div id="toast"></div>
-
+  </div>
 </body>
 </html>
