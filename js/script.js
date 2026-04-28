@@ -46,24 +46,44 @@ function loadCategories(){
 
 /* ================= CLEAR FORM (FIXED) ================= */
 function clearForm(){
-  document.getElementById("amount").value = "";
-  document.getElementById("desc").value = "";
-  document.getElementById("date").value = "";
-  document.getElementById("category").selectedIndex = 0;
+  const amount = document.getElementById("amount");
+  const desc = document.getElementById("desc");
+  const date = document.getElementById("date");
+  const category = document.getElementById("category");
 
-  // smooth UX
-  document.getElementById("amount").focus();
+  amount.value = "";
+  desc.value = "";
+  date.value = "";
+  category.selectedIndex = 0;
+
+  // force UI refresh (important fix)
+  amount.blur();
+  desc.blur();
+  date.blur();
+
+  setTimeout(()=>{
+    amount.focus();
+  }, 50);
 }
 
 /* ================= ADD ================= */
 document.getElementById("addBtn").addEventListener("click", ()=>{
 
-  const amount = Number(document.getElementById("amount").value);
-  const desc = document.getElementById("desc").value;
-  const date = document.getElementById("date").value;
-  const category = document.getElementById("category").value;
+  const amountEl = document.getElementById("amount");
+  const descEl = document.getElementById("desc");
+  const dateEl = document.getElementById("date");
+  const categoryEl = document.getElementById("category");
 
-  if(!amount || !desc || !date) return;
+  const amount = Number(amountEl.value);
+  const desc = descEl.value.trim();
+  const date = dateEl.value;
+  const category = categoryEl.value;
+
+  // ✅ validation
+  if(!amount || !desc || !date){
+    alert("Please fill all fields");
+    return;
+  }
 
   if(editingId){
     transactions = transactions.map(t =>
@@ -86,12 +106,14 @@ document.getElementById("addBtn").addEventListener("click", ()=>{
 
   localStorage.setItem("transactions", JSON.stringify(transactions));
 
+  // ✅ CLEAR FIRST (important change)
+  clearForm();
+
+  // then update UI
   updateUI();
   updateChart();
   renderMonthlySummary();
   updateGoalUI();
-
-  clearForm(); // ✅ FIX APPLIED HERE
 });
 
 /* ================= DELETE ================= */
@@ -173,9 +195,14 @@ function updateUI(){
   });
 
   if(filtered.length === 0){
-    list.innerHTML = "No transactions found";
-    return;
-  }
+  list.innerHTML = `
+    <div class="empty-state">
+      📭 No transactions yet <br>
+      <small>Start by adding income or expense</small>
+    </div>
+  `;
+  return;
+}
 
   let income = 0, expense = 0;
 
@@ -292,6 +319,17 @@ function formatMoney(num){
   return num.toLocaleString("en-IN");
 }
 
+function showToast(message, type="success"){
+  const toast = document.getElementById("toast");
+
+  toast.innerText = message;
+  toast.className = "show " + (type === "error" ? "toast-error" : "toast-success");
+
+  setTimeout(()=>{
+    toast.className = "";
+  }, 2500);
+}
+
 // =======================
 // GOAL FUNCTIONS
 // =======================
@@ -396,8 +434,11 @@ function updateGoalUI(){
   // ✅ Goal achieved
   if(goal.saved >= goal.amount){
     status.innerHTML =
-      `🎉 Goal Achieved! <br>
-       💰 Saved: ₹${goal.saved}`;
+  `🎉 Goal Achieved! <br>
+   💰 Saved: ₹${goal.saved} <br>
+   🏆 Great job!`;
+
+showToast("Goal Completed 🎉");
     
     addSection.style.display = "none";
   }
@@ -409,6 +450,38 @@ function updateGoalUI(){
     
     addSection.style.display = "flex";
   }
+}
+
+function exportCSV(){
+
+  if(transactions.length === 0){
+    showToast("No data to export", "error");
+    return;
+  }
+
+  // Header
+  let csv = "Type,Amount,Category,Description,Date\n";
+
+  // Rows
+  transactions.forEach(t=>{
+    csv += `${t.type},${t.amount},${t.category},${t.desc},${t.date}\n`;
+  });
+
+  // Create file
+  const blob = new Blob([csv], { type: "text/csv" });
+
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "budget_data.csv";
+
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+
+  showToast("CSV Downloaded ✅");
 }
 
 /* ================= FILTER EVENTS ================= */
@@ -425,3 +498,9 @@ window.onload = ()=>{
   renderMonthlySummary();
   updateGoalUI();
 };
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    document.getElementById("addBtn").click();
+  }
+});
