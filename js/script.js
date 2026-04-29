@@ -242,38 +242,55 @@ function updateUI(){
   document.getElementById("balance").innerText = "Balance: ₹" + (income - expense);
 }
 
-/* ================= CHART ================= */
 function updateChart(){
 
-  const data = {};
+  const chartEmpty = document.getElementById("chartEmpty");
+  const chartCanvas = document.getElementById("expenseChart");
 
-  transactions.forEach(t=>{
-    if(t.type === "expense"){
-      if(!data[t.category]) data[t.category] = 0;
-      data[t.category] += t.amount;
+  // ✅ get transactions
+  const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+  // ✅ filter expenses
+  const expenses = transactions.filter(t => t.type === "expense");
+
+  // ❌ no data
+  if(expenses.length === 0){
+    chartCanvas.style.display = "none";
+    chartEmpty.style.display = "block";
+    return;
+  }
+
+  // ✅ show chart
+  chartCanvas.style.display = "block";
+  chartEmpty.style.display = "none";
+
+  // group by category
+  const categoryTotals = {};
+
+  expenses.forEach(t => {
+    if(!categoryTotals[t.category]){
+      categoryTotals[t.category] = 0;
     }
+    categoryTotals[t.category] += t.amount;
   });
 
-  const labels = Object.keys(data);
-  const values = Object.values(data);
+  const labels = Object.keys(categoryTotals);
+  const data = Object.values(categoryTotals);
 
-  if(chart) chart.destroy();
+  // destroy old chart
+  if(window.expenseChartInstance){
+    window.expenseChartInstance.destroy();
+  }
 
-  const ctx = document.getElementById("mychart");
-  if(!ctx) return;
+  const ctx = chartCanvas.getContext("2d");
 
-  chart = new Chart(ctx, {
+  window.expenseChartInstance = new Chart(ctx, {
     type: "pie",
     data: {
       labels: labels,
       datasets: [{
-        data: values,
-        backgroundColor: ["red","blue","green","orange","purple"]
+        data: data
       }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false
     }
   });
 }
@@ -338,12 +355,7 @@ function showToast(message, type="success"){
     toast.className = "";
   }, 2500);
 }
-
-// =======================
-// GOAL FUNCTIONS
-// =======================
-
-// SAVE GOAL
+// ================= GOAL: SAVE =================
 function saveGoal(){
 
   const name = document.getElementById("goalName").value.trim();
@@ -354,22 +366,32 @@ function saveGoal(){
     return;
   }
 
+  const balance = getBalance();
+
   const goal = {
     name,
     amount,
     saved: 0
   };
 
+  // 🔴 If goal > balance → show warning but STILL allow goal
+  if(amount > balance){
+    alert("⚠️ Goal cannot be achieved with current balance");
+  }
+
+  // ✅ Save goal
   localStorage.setItem("goal", JSON.stringify(goal));
 
+  // Clear inputs
   document.getElementById("goalName").value = "";
   document.getElementById("goalAmount").value = "";
 
+  // Update UI
   updateGoalUI();
 }
 
 
-// ADD TO GOAL (NO TRANSACTIONS)
+// ================= ADD TO GOAL =================
 function addToGoal(){
 
   const goal = JSON.parse(localStorage.getItem("goal"));
@@ -390,16 +412,19 @@ function addToGoal(){
 
   const balance = getBalance();
 
-  // ❌ insufficient balance
+  // ❌ Only block if add amount > balance
   if(addAmount > balance){
     alert("Not enough balance");
     return;
   }
 
-  // ✅ Add to goal
+  // ✅ Add money to goal
   goal.saved += addAmount;
 
-  // ✅ IF GOAL COMPLETED → ADD TO TRANSACTION
+  // ✅ Save updated goal
+  localStorage.setItem("goal", JSON.stringify(goal));
+
+  // 🎉 If completed
   if(goal.saved >= goal.amount){
 
     transactions.push({
@@ -413,19 +438,15 @@ function addToGoal(){
 
     localStorage.setItem("transactions", JSON.stringify(transactions));
 
-    alert("🎉 Goal completed & amount deducted!");
+    showToast("🎉 Goal completed!","Success");
 
-    // ❌ Remove goal after completion
-    localStorage.removeItem("goal");
 
-  } else {
-    localStorage.setItem("goal", JSON.stringify(goal));
   }
 
-  // Clear inputs
+  // Clear input
   document.getElementById("goalAddAmount").value = "";
-  document.getElementById("goalDate").value = "";
 
+  // Refresh UI
   updateUI();
   updateChart();
   renderMonthlySummary();
@@ -433,14 +454,14 @@ function addToGoal(){
 }
 
 
-// DELETE GOAL
+// ================= DELETE GOAL =================
 function deleteGoal(){
   localStorage.removeItem("goal");
   updateGoalUI();
 }
 
 
-// UPDATE UI
+// ================= UPDATE UI =================
 function updateGoalUI(){
 
   const goal = JSON.parse(localStorage.getItem("goal"));
@@ -459,42 +480,46 @@ function updateGoalUI(){
   }
 
   const balance = getBalance();
-
   const percent = Math.min((goal.saved / goal.amount) * 100, 100);
 
   display.innerHTML = `<b>${goal.name}</b> - ₹${goal.amount}`;
   progress.style.width = percent + "%";
 
-  // ❌ Not enough total balance
+  // ⚠️ LOW BALANCE WARNING (NOT BLOCKING)
   if(balance < goal.amount){
     status.innerHTML =
-  `💰 Saved: ₹${goal.saved} <br>
-   🎯 Goal: ₹${goal.amount} <br>
-   💸 Remaining: ₹${goal.amount - goal.saved}`;
-    
-    addSection.style.display = "none";
+      `⚠️ Low Balance! Goal may not be achievable <br>
+       💰 Saved: ₹${goal.saved} <br>
+       🎯 Goal: ₹${goal.amount} <br>
+       💸 Remaining: ₹${goal.amount - goal.saved}`;
+
+    addSection.style.display = "flex"; // allow adding
     return;
   }
 
-  // ✅ Goal achieved
-  if(goal.saved >= goal.amount){
-    status.innerHTML =
-  `🎉 Goal Achieved! <br>
-   💰 Saved: ₹${goal.saved} <br>
-   🏆 Great job!`;
+  // 🎉 GOAL COMPLETED
+  
 
-showToast("Goal Completed 🎉");
-    
-    addSection.style.display = "none";
-  }
+  // 🟢 NORMAL STATE
   else{
     status.innerHTML =
       `💰 Saved: ₹${goal.saved} <br>
        🎯 Goal: ₹${goal.amount} <br>
        💸 Remaining: ₹${goal.amount - goal.saved}`;
-    
+
     addSection.style.display = "flex";
   }
+}
+
+function showToast(message, type = "success") {
+  const toast = document.getElementById("toast");
+
+  toast.innerText = message;
+  toast.className = `toast show ${type}`;
+
+  setTimeout(() => {
+    toast.className = "toast";
+  }, 2500);
 }
 
 function exportCSV(){

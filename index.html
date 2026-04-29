@@ -120,9 +120,17 @@
   <div id="list"></div>
 </div>
 
-<h2>Expense Chart</h2>
-<div class="chart-container">
-  <canvas id="mychart"></canvas>
+<div class="chart-card">
+  <h2>Expense Chart</h2>
+
+  <div class="chart-container">
+    <canvas id="expenseChart"></canvas>
+
+    <!-- Empty state -->
+    <div id="chartEmpty" class="chart-empty">
+      📊 No expense data yet
+    </div>
+  </div>
 </div>
 
 <h2>Monthly Summary</h2>
@@ -132,5 +140,6 @@
 
 <div id="toast"></div>
   </div>
+<div id="toast" class="toast"></div>  
 </body>
 </html>

@@ -626,3 +626,74 @@ h2{
 #goalStatus{
   color: #222 !important;
 }
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+
+  background: #2ecc71;
+  color: #fff;
+
+  padding: 10px 16px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  width: auto;
+  max-width: 220px;   /* 🔥 LIMIT WIDTH */
+
+  height: auto;
+  display: inline-block;
+  max-height: 50px;
+  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+
+  z-index: 1000;
+}
+
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.success {
+  background: #2ecc71;
+}
+
+.toast.error {
+  background: #e74c3c;
+}
+
+.chart-card {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide canvas initially if no data */
+#expenseChart {
+  display: none;
+}
+
+/* Empty state UI */
+.chart-empty {
+  color: #ccc;
+  font-size: 16px;
+  text-align: center;
+  opacity: 0.8;
+}
